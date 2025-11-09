@@ -1,0 +1,94 @@
+# https://dunst-project.org/documentation/
+[global]
+	font = JetBrainsMono Nerd Font 16
+
+	### misc ###
+	follow = keyboard
+	enable_posix_regex = true
+	idle_threshold = 120
+	markup = full
+	history_length = 100
+
+	browser = firefox
+	dmenu = wofi --dmenu -p " "
+
+	### looks ###
+	width=(220,500)
+	height=500
+	corner_radius = 10
+	notification_limit = 4
+	origin = top-right
+	offset=40x40
+
+	#padding
+	padding = 10
+	horizontal_padding = 16
+
+	# progress bar
+	progress_bar = true
+	progress_bar_height = 15
+	progress_bar_horizontal_alignment = center
+	progress_bar_min_width = 100
+	progress_bar_max_width = 400
+	progress_bar_frame_width = 2
+
+	#frame
+	frame_width = 2
+
+	# icons
+	icon_theme = Adwaita
+	enable_recursive_icon_lookup = true
+
+	#others
+	gap_size = 3
+	sort = true
+	indicate_hidden = true
+	show_age_threshold = 60
+	sticky_history = yes
+	show_indicators = yes
+
+	# word_wrap = yes
+	# ignore_newline = no
+
+	# format = "<big><b>%a</b></big>\n<i><b>%s</b></i>%p %n\n%b"
+	format = "<big><b>%a</b></big>\n<i><b>%s</b></i>\n%b"
+
+	# separator_color = "#1d2021"
+
+	browser = firefox
+	icon_position = left
+	min_icon_size = 100
+	max_icon_size = 100
+
+	mouse_left_click = close_current
+	mouse_middle_click = close_all 
+	mouse_right_click = context
+
+[urgency_low]
+	background = "#1a1b26"
+	foreground = "#c0caf5"
+	frame_color = "#9ece6a"
+	highlight = "#9ece6a"
+
+	timeout = 5
+
+[urgency_normal]
+	background = "#1a1b26"
+	foreground = "#c0caf5"
+	frame_color = "#7aa2f7"
+	highlight = "#7aa2f7"
+
+	timeout = 5
+
+[urgency_critical]
+	background = "#1a1b26"
+	foreground = "#f7768e"
+	frame_color = "#f7768e"
+	highlight = "#f7768e"
+
+	timeout = 10
+
+[ignore_flameshot_warning]
+    body = "grim's screenshot component is implemented based on wlroots, it may not be used in GNOME or similar desktop environments"
+    format = ""
+
