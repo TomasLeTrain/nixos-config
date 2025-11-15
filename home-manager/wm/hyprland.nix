@@ -82,7 +82,7 @@
       "$scripts" = "~/.config/hypr/scripts";
 
       monitor = [
-        "eDP-1,3840x2160@60.00Hz,auto,2.5"
+        "eDP-1,2560x1600@59.99Hz,auto,2"
       ];
 
       env = [

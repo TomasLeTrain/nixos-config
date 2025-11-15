@@ -5,7 +5,7 @@
     ./boot.nix
     ./hardware-configuration.nix
     ./graphical.nix
-    ./wireguard.nix
+    # ./wireguard.nix
   ];
 
   nix.settings.experimental-features = [ "nix-command" "flakes" ];
