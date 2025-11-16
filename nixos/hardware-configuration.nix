@@ -11,14 +11,6 @@
   hardware.enableRedistributableFirmware = true;
   hardware.enableAllFirmware = true;
 
-  boot.initrd.availableKernelModules = ["xhci_pci" "thunderbolt" "nvme" "uas" "sd_mod"];
-
-  boot.initrd.kernelModules = ["i915"];
-  boot.kernelParams = [ "i915.enable_guc=3" ];
-
-  boot.kernelModules = ["kvm-intel"];
-  boot.extraModulePackages = [];
-
   hardware.graphics = {
     enable = true;
 
@@ -36,18 +28,18 @@
   hardware.bluetooth.powerOnBoot = true;
 
   fileSystems."/" = {
-    device = "/dev/disk/by-uuid/8e331926-c408-4d5a-baa1-c66641f0ef3c";
+    device = "/dev/disk/by-label/NIXROOT";
     fsType = "ext4";
   };
 
   fileSystems."/boot" = {
-    device = "/dev/disk/by-uuid/2C3B-E32B";
+    device = "/dev/disk/by-label/NIXBOOT";
     fsType = "vfat";
     options = ["fmask=0022" "dmask=0022"];
   };
 
   swapDevices = [
-    {device = "/dev/disk/by-uuid/ffa00982-8abe-4024-b019-e39087b015b3";}
+    {device = "/dev/disk/by-label/SWAP";}
   ];
 
   # Enables DHCP on each ethernet and wireless interface. In case of scripted networking

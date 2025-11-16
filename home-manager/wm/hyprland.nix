@@ -10,60 +10,6 @@
     hyprshot
   ];
 
-  wayland.windowManager.sway = let
-    mod = "Mod4";
-  in {
-    enable = true;
-    config = {
-      modifier = mod;
-      keybindings = lib.attrsets.mergeAttrsList [
-        (lib.attrsets.mergeAttrsList (map (num: let
-          ws = toString num;
-        in {
-          "${mod}+${ws}" = "workspace ${ws}";
-          "${mod}+Ctrl+${ws}" = "move container to workspace ${ws}";
-        }) [1 2 3 4 5 6 7 8 9 0]))
-
-        (lib.attrsets.concatMapAttrs (key: direction: {
-            "${mod}+${key}" = "focus ${direction}";
-            "${mod}+Ctrl+${key}" = "move ${direction}";
-          }) {
-            h = "left";
-            j = "down";
-            k = "up";
-            l = "right";
-          })
-
-        {
-          "${mod}+Return" = "exec --no-startup-id ${pkgs.kitty}/bin/kitty";
-          "${mod}+space" = "exec --no-startup-id wofi --show drun,run";
-
-          "${mod}+x" = "kill";
-
-          "${mod}+a" = "focus parent";
-          "${mod}+e" = "layout toggle split";
-          "${mod}+f" = "fullscreen toggle";
-          "${mod}+g" = "split h";
-          "${mod}+s" = "layout stacking";
-          "${mod}+v" = "split v";
-          "${mod}+w" = "layout tabbed";
-
-          "${mod}+Shift+r" = "exec swaymsg reload";
-          "--release Print" = "exec --no-startup-id ${pkgs.sway-contrib.grimshot}/bin/grimshot copy area";
-          "${mod}+Ctrl+l" = "exec ${pkgs.swaylock-fancy}/bin/swaylock-fancy";
-          "${mod}+Ctrl+q" = "exit";
-        }
-      ];
-      focus.followMouse = false;
-      startup = [
-        {command = "firefox";}
-      ];
-      workspaceAutoBackAndForth = true;
-    };
-    systemd.enable = true;
-    wrapperFeatures = {gtk = true;};
-  };
-
   wayland.windowManager.hyprland = {
     enable = true;
 
@@ -83,6 +29,7 @@
 
       monitor = [
         "eDP-1,2560x1600@59.99Hz,auto,2"
+        "desc:Sceptre Tech Inc Sceptre M27   NM275BIQ0001, 1920x1080@120.00Hz, auto, 1"
       ];
 
       env = [
@@ -93,7 +40,7 @@
       exec-once = [
         # "swww-daemon && swww img /home/tomas/wallpapers/geometric.png"
         "swww-daemon"
-  		"quickshell &"
+        "quickshell &"
       ];
 
       general = {
@@ -202,7 +149,7 @@
       misc = {
         force_default_wallpaper = -1;
         disable_hyprland_logo = true;
-				# vfr = false;
+        # vfr = false;
       };
 
       input = {
@@ -225,9 +172,9 @@
 
       # https://wiki.hyprland.org/Configuring/Variables/#gestures
       gestures = {
-				gesture = [
-					"3, vertical, workspace"
-				];
+        gesture = [
+          "3, vertical, workspace"
+        ];
         workspace_swipe_forever = true;
         workspace_swipe_direction_lock = false;
         workspace_swipe_cancel_ratio = 0.15;
@@ -238,69 +185,70 @@
       #   sensitivity = -0.5
       # ]
 
-      bind = [
-        # Example binds, see https://wiki.hyprland.org/Configuring/Binds/ for more
-        "$mod, Return, exec, $terminal"
-        "$mod, semicolon, killactive,"
-        "$mod, M, exit,"
+      bind = builtins.concatLists [
+        [
+          # Example binds, see https://wiki.hyprland.org/Configuring/Binds/ for more
+          "$mod, Return, exec, $terminal"
+          "$mod, semicolon, killactive,"
+          "$mod, M, exit,"
 
-        "$mod, O, exec, obsidian"
+          "$mod, O, exec, obsidian"
 
-        # screenshot
-        "$mod SHIFT, S, exec, hyprshot -m region --clipboard-only"
+          # screenshot
+          "$mod SHIFT, S, exec, hyprshot -m region --clipboard-only"
 
-        "$mod SHIFT, Return, exec, firefox"
-        "$mod CTRL, Return, exec, firefox -p school"
+          "$mod SHIFT, Return, exec, firefox"
+          "$mod CTRL, Return, exec, firefox -p school"
 
-        "$mod, E, exec, $fileManager"
-        "$mod, V, togglefloating,"
-        "$mod, D, exec, $menu"
-        "$mod, P, pseudo, # dwindle"
-        "$mod, U, togglesplit, # dwindle"
+          "$mod, E, exec, $fileManager"
+          "$mod, V, togglefloating,"
+          "$mod, D, exec, $menu"
+          "$mod, P, pseudo, # dwindle"
+          "$mod, U, togglesplit, # dwindle"
+        ]
 
-        # Move focus with mod + arrow keys
-        "$mod, h, movefocus, l"
-        "$mod, l, movefocus, r"
-        "$mod, k, movefocus, u"
-        "$mod, j, movefocus, d"
+        (
+          let
+						nums_list = [1 2 3 4 5 6 7 8 9];
+						# of the form { "num" = "num" }
+            nums_set = builtins.listToAttrs( map (x: {name = (toString x); value = (toString x);}) nums_list);
 
-        "$mod SHIFT, h, movewindow, l"
-        "$mod SHIFT, l, movewindow, r"
-        "$mod SHIFT, k, movewindow, u"
-        "$mod SHIFT, j, movewindow, d"
+						# special case where 0 -> 10
+						modified_nums_set = nums_set // {"0" = "10";};
+          in
+            builtins.concatLists
+            (lib.attrsets.mapAttrsToList (key: ws: [
+                "$mod, ${key}, workspace, ${ws}"
+                "$mod SHIFT, ${key}, movetoworkspace, ${ws}"
+						]) modified_nums_set
+				))
 
-        # Switch workspaces with mod + [0-9]
-        "$mod, 1, workspace, 1"
-        "$mod, 2, workspace, 2"
-        "$mod, 3, workspace, 3"
-        "$mod, 4, workspace, 4"
-        "$mod, 5, workspace, 5"
-        "$mod, 6, workspace, 6"
-        "$mod, 7, workspace, 7"
-        "$mod, 8, workspace, 8"
-        "$mod, 9, workspace, 9"
-        "$mod, 0, workspace, 10"
+        (
+					let
+					movement_binds = {
+              h = "l";
+              j = "d";
+              k = "u";
+              l = "r";
+            };
+					in
+						builtins.concatLists
+						(lib.attrsets.mapAttrsToList (key: direction: [
+							"$mod, ${key}, movefocus, ${direction}"
+							"$mod SHIFT, ${key}, movewindow, ${direction}"
+						]) movement_binds
+				))
 
-        # Move active window to a workspace with mod + SHIFT + [0-9]
-        "$mod SHIFT, 1, movetoworkspace, 1"
-        "$mod SHIFT, 2, movetoworkspace, 2"
-        "$mod SHIFT, 3, movetoworkspace, 3"
-        "$mod SHIFT, 4, movetoworkspace, 4"
-        "$mod SHIFT, 5, movetoworkspace, 5"
-        "$mod SHIFT, 6, movetoworkspace, 6"
-        "$mod SHIFT, 7, movetoworkspace, 7"
-        "$mod SHIFT, 8, movetoworkspace, 8"
-        "$mod SHIFT, 9, movetoworkspace, 9"
-        "$mod SHIFT, 0, movetoworkspace, 10"
+        [
+          # Scroll through existing workspaces with mod + scroll
+          "$mod, mouse_down, workspace, e+1"
+          "$mod, mouse_up, workspace, e-1"
 
-        # Scroll through existing workspaces with mod + scroll
-        "$mod, mouse_down, workspace, e+1"
-        "$mod, mouse_up, workspace, e-1"
+          "$mod SHIFT, n, exec, $scripts/vpn.sh"
 
-        "$mod SHIFT, n, exec, $scripts/vpn.sh"
-
-        # tab back and forth
-        "$mod, Tab, workspace, previous"
+          # tab back and forth
+          "$mod, Tab, workspace, previous"
+        ]
       ];
 
       # Move/resize windows with mod + LMB/RMB and dragging
@@ -331,11 +279,11 @@
       ];
 
       layerrule = [
-  		# disable animations on launcher
+        # disable animations on launcher
         "noanim, launcher"
 
-  		# disable animation on screenshots
-  		"noanim, selection"
+        # disable animation on screenshots
+        "noanim, selection"
       ];
 
       # Ignore maximize requests from apps. You'll probably like this.

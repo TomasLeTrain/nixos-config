@@ -39,21 +39,6 @@
     };
   };
 
-  # this is a life saver.
-  # literally no documentation about this anywhere.
-  # might be good to write about this...
-  # https://www.reddit.com/r/NixOS/comments/u0cdpi/tuigreet_with_xmonad_how/
-  # systemd.services.greetd.serviceConfig = {
-  #   Type = "idle";
-  #   StandardInput = "tty";
-  #   StandardOutput = "tty";
-  #   StandardError = "journal"; # Without this errors will spam on screen
-  #   # Without these bootlogs will spam on screen
-  #   TTYReset = true;
-  #   TTYVHangup = true;
-  #   TTYVTDisallocate = true;
-  # };
-
   console = {
     earlySetup = false;
     useXkbConfig = true;
@@ -85,28 +70,30 @@
   };
 
   boot = {
+    # Use latest kernel.
+    kernelPackages = pkgs.linuxPackages_latest;
+
     initrd = {
-      availableKernelModules = ["i915" "xhci_pci" "ahci" "nvme" "usb_storage" "sd_mod"];
-      kernelModules = [];
+      availableKernelModules = ["xhci_pci" "thunderbolt" "nvme" "uas" "sd_mod"];
+      kernelModules = ["i915"];
     };
 
     kernelModules = ["kvm-intel"];
     extraModulePackages = [];
 
     kernelParams = [
-      "i915.enable_guc=2"
-      "quiet"
+      "i915.enable_guc=3"
+
+      # "quiet"
       # "splash"
 
-      "i915.fastboot=1"
-      "boot.shell_on_fail"
+      # "i915.fastboot=1"
+      # "boot.shell_on_fail"
 
-      # possibly useless?
-      "loglevel=3"
-      # "rd.systemd.show_status=false"
-      "systemd.show_status=auto"
-      "rd.udev.log_level=3"
-      "vt.global_cursor_default=0"
+      # "loglevel=3"
+      # "systemd.show_status=auto"
+      # "rd.udev.log_level=3"
+      # "vt.global_cursor_default=0"
     ];
 
     initrd.verbose = false;
