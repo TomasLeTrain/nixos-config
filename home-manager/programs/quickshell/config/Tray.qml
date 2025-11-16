@@ -40,7 +40,7 @@ ColumnLayout {
 			IconImage {
 				id: image
 				// TODO: fix this?
-				source: mouse_area.item.title != "dropbox" ? mouse_area.item.icon : "file:/home/tomas/.dropbox-dist/dropbox-lnx.x86_64-233.4.4938/images/hicolor/16x16/status/dropboxstatus-idle.png"
+				source: mouse_area.item.title != "dropbox" ? mouse_area.item.icon : "file:/home/tomas/.dropbox-dist/dropbox-lnx.x86_64-236.4.5918/images/hicolor/16x16/status/dropboxstatus-idle.png"
 				visible: source != ""
 				implicitSize: 22
 			}

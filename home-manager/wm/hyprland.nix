@@ -209,12 +209,11 @@
 
         (
           let
-						nums_list = [1 2 3 4 5 6 7 8 9];
-						# of the form { "num" = "num" }
-            nums_set = builtins.listToAttrs( map (x: {name = (toString x); value = (toString x);}) nums_list);
-
-						# special case where 0 -> 10
-						modified_nums_set = nums_set // {"0" = "10";};
+	    nums_list = [1 2 3 4 5 6 7 8 9];
+	    # of the form { "num" = "num" }
+            nums_set = (lib.attrsets.genAttrs (map (x: toString x) nums_list)) (name: name);
+	    # special case where 0 -> 10
+	    modified_nums_set = nums_set // {"0" = "10";};
           in
             builtins.concatLists
             (lib.attrsets.mapAttrsToList (key: ws: [

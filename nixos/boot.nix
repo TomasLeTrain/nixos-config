@@ -84,7 +84,7 @@
     kernelParams = [
       "i915.enable_guc=3"
 
-      # "quiet"
+      "quiet"
       # "splash"
 
       # "i915.fastboot=1"

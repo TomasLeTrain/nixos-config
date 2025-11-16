@@ -36,20 +36,49 @@
       config.allowUnfree = true;
     };
     lib = nixpkgs.lib;
-  in {
+  in rec {
     nixosConfigurations = {
       nixbtw = lib.nixosSystem {
         inherit system pkgs;
-        modules = [ ./nixos/configuration.nix ];
+        modules = [
+	  ./nixos/configuration.nix
+#           home-manager.nixosModules.home-manager
+# 	  {
+# 		  home-manager = {
+# 			  useGlobalPkgs = true;
+# 			  useUserPackages = true;
+# # inherit pkgs;
+# 			  extraSpecialArgs = { inherit inputs nix-colors; };
+# 			  users.tomas = import ./home-manager/home.nix;
+# 		  };
+# 	  }
+	];
       };
     };
 
     homeConfigurations = {
+      # "tomas@nixbtw" = nixosConfigurations.nixbtw.config.home-manager.users.tomas.home;
+
       "tomas@nixbtw" = home-manager.lib.homeManagerConfiguration {
         inherit pkgs;
         extraSpecialArgs = { inherit inputs nix-colors; };
         modules = [ ./home-manager/home.nix ];
       };
     };
-  };
+
+	  #  packages = {
+	  #      "${system}" = {
+	  # # scuff way to let hm not fail
+	  #        homeConfigurations = {
+	  #          "tomas@nixbtw" = let
+	  #            cfg = nixosConfigurations.nixbtw.config.home-manager.users.tomas;
+	  #          in  {
+	  #            activationPackage = cfg.home.activationPackage;  
+	  #            config.news.json.output = cfg.news.json.output; 
+	  #          };
+	  #        };
+	  #      };
+	  #    };
+   };
+
 }

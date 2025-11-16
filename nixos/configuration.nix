@@ -68,7 +68,7 @@
   environment.pathsToLink = ["/share/zsh"];
 
   environment.sessionVariables = {
-    # LIBVA_DRIVER_NAME = "iHD"; # Force intel-media-driver
+    LIBVA_DRIVER_NAME = "iHD"; # Force intel-media-driver
     # for hyprland
     NIXOS_OZONE_WL = "1";
   };
