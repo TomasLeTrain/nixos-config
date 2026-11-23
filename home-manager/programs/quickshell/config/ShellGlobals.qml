@@ -5,8 +5,12 @@ import Quickshell
 
 Singleton {
 	readonly property var colors: QtObject {
+		readonly property color surrround_color: "#141415";
+
 		readonly property color fg: "#cdcdcd";
 		readonly property color second_fg: "#0a0a0f";
+
+		// readonly property color bar: "#201401";
 		readonly property color bar: "#141415";
 		readonly property color barOutline: "#00878787";
 

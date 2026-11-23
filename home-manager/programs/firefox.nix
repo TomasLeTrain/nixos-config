@@ -9,12 +9,13 @@
     # extensions = [ ];
   };
 
-  home.file.".mozilla/firefox/personal/chrome" = {
+  programs.firefox.configPath = "${config.xdg.configHome}/mozilla/firefox";
+  home.file."${config.xdg.configHome}/mozilla/firefox/personal/chrome" = {
     source = "${inputs.potatofox}/chrome";
     recursive = true;
   };
 
-  # home.file.".mozilla/firefox/personal/chrome/userChrome.css" = {
+  # home.file."${config.xdg.configHome}/mozilla/firefox/personal/chrome/userChrome.css" = {
   #   text = ''
   #     #TabsToolbar{ visibility: collapse !important }
   #     #sidebar-header { display: none !important }
@@ -25,6 +26,10 @@
     enable = true;
 
     package = pkgs.firefox-bin;
+
+    policies = {
+      DefaultSerialGuardSetting = 3;
+    };
 
     profiles.school = {
       name = "school";
@@ -77,11 +82,9 @@
       settings = {
         "browser.startup.homepage" = "about:home";
 
-
         "toolkit.legacyUserProfileCustomizations.stylesheets" = true;
         "svg.context-properties.content.enabled" = true;
         "layout.css.has-selector.enabled" = true;
-
 
         "browser.urlbar.suggest.calculator" = true;
         "browser.urlbar.unitConversion.enabled" = true;

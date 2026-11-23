@@ -6,11 +6,15 @@
 }: {
   # terminal related applications
   home.packages = with pkgs; [
-    neofetch
+    fastfetch
     fzf
     htop
     btop
     bluetui
+
+    tree
+
+    lazygit
 
     tmux
 
@@ -18,12 +22,22 @@
     zsh-fast-syntax-highlighting
   ];
 
+  programs = {
+    direnv = {
+      enable = true;
+      enableBashIntegration = true;
+      enableZshIntegration = true;
+      nix-direnv.enable = true;
+    };
+  };
+
   programs.bash = {
     enable = true;
   };
 
   programs.zsh = {
     enable = true;
+    dotDir = "${config.xdg.configHome}/zsh";
 
     plugins = [
       # {
@@ -46,12 +60,12 @@
       nd = "nix develop";
       ns = "nix-shell";
 
-      cf = "g++ -Wall -Wextra -Wshadow -D_GLIBCXX_ASSERTIONS -DDEBUG -ggdb3 -fmax-errors=2 -std=c++17 -o out";
-      ca = "g++ -Wall -Wextra -Wshadow -Wno-sign-conversion -fsanitize=address,undefined -D_GLIBCXX_ASSERTIONS -DDEBUG -ggdb3 -fmax-errors=2 -std=c++17 -o out";
+      cf = "g++ -Wall -Wextra -Wshadow -D_GLIBCXX_ASSERTIONS -DDEBUG -ggdb3 -fmax-errors=2 -std=c++20 -o out";
+      ca = "g++ -Wall -Wextra -Wshadow -Wno-sign-conversion -fsanitize=address,undefined -D_GLIBCXX_ASSERTIONS -DDEBUG -ggdb3 -fmax-errors=2 -std=c++20 -o out";
 
-      cfd = "g++ -Wall -Wextra -Wshadow -Wformat=2 -Wfloat-equal -Wconversion -Wlogical-op -Wshift-overflow=2 -Wduplicated-cond -Wcast-qual -Wcast-align -Wno-sign-conversion -fsanitize=address,undefined -fno-sanitize-recover -fstack-protector -D_GLIBCXX_DEBUG -D_GLIBCXX_DEBUG_PEDANTIC -D_FORTIFY_SOURCE=2 -D_GLIBCXX_ASSERTIONS -DDEBUG -ggdb3 -O2 -fmax-errors=2 -std=c++17 -o out";
+      cfd = "g++ -Wall -Wextra -Wshadow -Wformat=2 -Wfloat-equal -Wconversion -Wlogical-op -Wshift-overflow=2 -Wduplicated-cond -Wcast-qual -Wcast-align -Wno-sign-conversion -fsanitize=address,undefined -fno-sanitize-recover -fstack-protector -D_GLIBCXX_DEBUG -D_GLIBCXX_DEBUG_PEDANTIC -D_FORTIFY_SOURCE=2 -D_GLIBCXX_ASSERTIONS -DDEBUG -ggdb3 -O2 -fmax-errors=2 -std=c++20 -o out";
 
-      cfn = "g++ -std=c++17 -o out";
+      cfn = "g++ -std=c++20 -o out";
       cfr = "./out";
       cfcomp = "cd ~/cf/comps";
       cfdaily = "cd ~/cf/daily";
@@ -116,7 +130,7 @@
 
       font = {
         normal.family = "JetBrains Mono Nerd Font";
-        size = 17;
+        size = 16;
       };
 
       # env.TERM = "xterm-256color";
@@ -151,9 +165,9 @@
       if [[ $# -eq 1 ]]; then
           selected=$1
       else
-          selected=$(find ${directories} -mindepth 1 -maxdepth 1 -type d | \
+          selected=$(find -L ${directories} -mindepth 1 -maxdepth 1 -type d | \
               sed "s|^$HOME/||" | \
-							fzf --tmux 60% --style=minimal --color=bg+:16
+      	fzf --tmux 60% --style=minimal --color=bg+:16
           )
           # Add home path back
           if [[ -n "$selected" ]]; then

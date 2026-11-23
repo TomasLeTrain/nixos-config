@@ -6,12 +6,15 @@
 }: {
   home.packages = with pkgs; [
     # maaging backgrounds
-    swww
+    awww
     hyprshot
   ];
 
   wayland.windowManager.hyprland = {
     enable = true;
+
+    # for now
+    configType = "hyprlang";
 
     package = pkgs.hyprland;
 
@@ -22,14 +25,18 @@
       "$mod" = "SUPER";
 
       "$terminal" = "alacritty";
+      "$calculator" = "speedcrunch";
       "$fileManager" = "dolphin";
       "$menu" = "$(tofi-drun --fuzzy-match true)";
+      "$randomWallpaper" = "awww img ~/wallpapers/$(ls ~/wallpapers | shuf -n 1)";
 
       "$scripts" = "~/.config/hypr/scripts";
 
       monitor = [
         "eDP-1,2560x1600@59.99Hz,auto,2"
-        "desc:Sceptre Tech Inc Sceptre M27   NM275BIQ0001, 1920x1080@120.00Hz, auto, 1"
+        "HDMI-A-1,highres@highrr,auto,1"
+        "DP-3,highres@highrr,auto,1"
+        "desc:Sceptre Tech Inc Sceptre M27   NM275BIQ0001, 1920x1080@165.00Hz, auto, 1"
       ];
 
       env = [
@@ -38,16 +45,15 @@
       ];
 
       exec-once = [
-        # "swww-daemon && swww img /home/tomas/wallpapers/geometric.png"
-        "swww-daemon"
+        "awww-daemon"
         "quickshell &"
       ];
 
       general = {
-        gaps_in = 0;
-        gaps_out = 0;
+        gaps_in = 5;
+        gaps_out = 15;
 
-        border_size = 5;
+        border_size = 4;
 
         # "col.active_border" = "rgba(33ccffee) rgba(00ff99ee) 45deg"
         "col.active_border" = "rgba(0033ff99) rgba(aa00ff99) 45deg";
@@ -58,23 +64,28 @@
 
         allow_tearing = false;
 
-        layout = "dwindle";
+        # layout = "dwindle";
+        layout = "scrolling";
       };
 
       # debug = {
       #   disable_logs = false;
       #   enable_stdout_logs = true;
       # };
-      render = {
-        new_render_scheduling = true;
-      };
+      # render = {
+      #   new_render_scheduling = true;
+      # };
 
       decoration = {
-        rounding = 5;
+        rounding = 11;
 
         # Change transparency of focused and unfocused windows
         active_opacity = 1.0;
         inactive_opacity = 1.0;
+
+        shadow = {
+          enabled = false;
+        };
 
         # shadow = {
         #   enabled = true;
@@ -119,8 +130,8 @@
           # "windowsIn, 1, 2.1, easeOutQuint, popin 87%"
 
           # "windows, 1, 2.79, easeOutQuint, gnomed"
-          "windowsIn, 1, 1.8, windowIn, slide"
-          "windowsOut, 1, 1.8, windowIn, slide"
+          "windowsIn, 1, 1.8, windowIn, slide right"
+          "windowsOut, 1, 1.8, windowIn, slide down"
           "windowsMove, 1, 1.8, windowResize"
           "fade, 1, 1.5, default"
 
@@ -138,8 +149,12 @@
 
       # See https://wiki.hyprland.org/Configuring/Dwindle-Layout/ for more
       dwindle = {
-        pseudotile = true; # Master switch for pseudotiling. Enabling is bound to mod + P in the keybinds section below
+        # pseudotile = true; # Master switch for pseudotiling. Enabling is bound to mod + P in the keybinds section below
         preserve_split = true; # You probably want this
+      };
+
+      scrolling = {
+        column_width = 0.8;
       };
 
       master = {
@@ -161,12 +176,14 @@
 
         follow_mouse = 1;
 
+        # sensitivity = 0.7; # -1.0 - 1.0, 0 means no modification.
         sensitivity = 0.7; # -1.0 - 1.0, 0 means no modification.
         accel_profile = "flat";
 
         touchpad = {
           natural_scroll = true;
           tap-and-drag = true;
+          # disable_while_typing = false;
         };
       };
 
@@ -174,25 +191,30 @@
       gestures = {
         gesture = [
           "3, vertical, workspace"
+          "3, horizontal, scale: 4.0, scrollMove"
         ];
         workspace_swipe_forever = true;
         workspace_swipe_direction_lock = false;
         workspace_swipe_cancel_ratio = 0.15;
+        scrolling = {
+          # When releasing the scroll move gesture, whether it shoud try to snap to the grid.
+          move_snap_to_grid = true;
+          # When releasing the scroll move gesture, whether it shoud snap the cursor to the newly focused window
+          move_snap_cursor = true;
+          # /*
+        };
       };
-
-      # device = [
-      #   name = epic-mouse-v1
-      #   sensitivity = -0.5
-      # ]
 
       bind = builtins.concatLists [
         [
           # Example binds, see https://wiki.hyprland.org/Configuring/Binds/ for more
           "$mod, Return, exec, $terminal"
           "$mod, semicolon, killactive,"
+
           "$mod, M, exit,"
 
           "$mod, O, exec, obsidian"
+          "$mod SHIFT, C, exec, $calculator"
 
           # screenshot
           "$mod SHIFT, S, exec, hyprshot -m region --clipboard-only"
@@ -203,40 +225,50 @@
           "$mod, E, exec, $fileManager"
           "$mod, V, togglefloating,"
           "$mod, D, exec, $menu"
-          "$mod, P, pseudo, # dwindle"
-          "$mod, U, togglesplit, # dwindle"
+          # "$mod, P, pseudo, # dwindle"
+          "$mod, U, layoutmsg, togglesplit"
+
+          ",XF86Calculator, exec, $calculator"
+          ",Help, exec, $randomWallpaper"
+          # ",Help, exec, speedcrunch"
         ]
 
         (
           let
-	    nums_list = [1 2 3 4 5 6 7 8 9];
-	    # of the form { "num" = "num" }
+            nums_list = [1 2 3 4 5 6 7 8 9];
+            # of the form { "num" = "num" }
             nums_set = (lib.attrsets.genAttrs (map (x: toString x) nums_list)) (name: name);
-	    # special case where 0 -> 10
-	    modified_nums_set = nums_set // {"0" = "10";};
+            # special case where 0 -> 10
+            modified_nums_set = nums_set // {"0" = "10";};
           in
             builtins.concatLists
-            (lib.attrsets.mapAttrsToList (key: ws: [
+            (
+              lib.attrsets.mapAttrsToList (key: ws: [
                 "$mod, ${key}, workspace, ${ws}"
                 "$mod SHIFT, ${key}, movetoworkspace, ${ws}"
-						]) modified_nums_set
-				))
+              ])
+              modified_nums_set
+            )
+        )
 
         (
-					let
-					movement_binds = {
+          let
+            movement_binds = {
               h = "l";
               j = "d";
               k = "u";
               l = "r";
             };
-					in
-						builtins.concatLists
-						(lib.attrsets.mapAttrsToList (key: direction: [
-							"$mod, ${key}, movefocus, ${direction}"
-							"$mod SHIFT, ${key}, movewindow, ${direction}"
-						]) movement_binds
-				))
+          in
+            builtins.concatLists
+            (
+              lib.attrsets.mapAttrsToList (key: direction: [
+                "$mod, ${key}, movefocus, ${direction}"
+                "$mod SHIFT, ${key}, movewindow, ${direction}"
+              ])
+              movement_binds
+            )
+        )
 
         [
           # Scroll through existing workspaces with mod + scroll
@@ -247,6 +279,7 @@
 
           # tab back and forth
           "$mod, Tab, workspace, previous"
+          "Alt, Tab, workspace, previous"
         ]
       ];
 
@@ -263,14 +296,17 @@
       bindel = [
         ",XF86AudioRaiseVolume, exec, wpctl set-volume @DEFAULT_AUDIO_SINK@ 5%+"
         ",XF86AudioLowerVolume, exec, wpctl set-volume @DEFAULT_AUDIO_SINK@ 5%-"
-        ",XF86AudioMute, exec, wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle"
-        ",XF86AudioMicMute, exec, wpctl set-mute @DEFAULT_AUDIO_SOURCE@ toggle"
+        "SHIFT,XF86AudioRaiseVolume, exec, wpctl set-volume @DEFAULT_AUDIO_SINK@ 1%+"
+        "SHIFT,XF86AudioLowerVolume, exec, wpctl set-volume @DEFAULT_AUDIO_SINK@ 1%-"
         ",XF86MonBrightnessUp, exec, brightnessctl s 10%+"
         ",XF86MonBrightnessDown, exec, brightnessctl s 10%-"
       ];
 
       # Requires playerctl
       bindl = [
+        ",XF86AudioMute, exec, wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle"
+        ",XF86AudioMicMute, exec, wpctl set-mute @DEFAULT_AUDIO_SOURCE@ toggle"
+
         ", XF86AudioNext, exec, playerctl next"
         ", XF86AudioPause, exec, playerctl play-pause"
         ", XF86AudioPlay, exec, playerctl play-pause"
@@ -279,22 +315,26 @@
 
       layerrule = [
         # disable animations on launcher
-        "noanim, launcher"
+        "no_anim on, match:namespace launcher"
 
         # disable animation on screenshots
-        "noanim, selection"
+        "no_anim on, match:namespace selection"
       ];
 
       # Ignore maximize requests from apps. You'll probably like this.
-      windowrulev2 = [
-        "suppressevent maximize, class:.*"
-        # disable rounding for firefox
-        "rounding 0, class:^[fF]irefox"
-        "rounding 0, class:^[fF]irefox"
-
-        # Fix some dragging issues with XWayland
-        "nofocus,class:^$,title:^$,xwayland:1,floating:1,fullscreen:0,pinned:0"
+      windowrule = [
+        "match:class .*, suppress_event maximize"
       ];
+
+      # windowrulev2 = [
+      #   # "suppressevent maximize, class:.*"
+      #   # disable rounding for firefox
+      #   # "rounding 0, class:^[fF]irefox"
+      #   # "rounding 0, class:^[fF]irefox"
+      #
+      #   # Fix some dragging issues with XWayland
+      #   # "nofocus,class:^$,title:^$,xwayland:1,floating:1,fullscreen:0,pinned:0"
+      # ];
     };
     # plugins = [
     #   inputs.hyprland-plugins.packages.${pkgs.system}.hyprwinwrap

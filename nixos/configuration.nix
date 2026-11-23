@@ -2,16 +2,24 @@
   config,
   lib,
   pkgs,
+  nix-secrets,
+  root,
   ...
 }: {
   imports = [
     ./boot.nix
     ./hardware-configuration.nix
     ./graphical.nix
-    # ./wireguard.nix
+    ./wireguard.nix
+    ./secrets.nix
   ];
 
-	# optimize store sizes
+  # nixpkgs.overlays = [
+  #   (final: prev: {
+  #   })
+  # ];
+
+  # optimize store sizes
   nix.optimise.automatic = true;
   nix.optimise.dates = ["15:00"]; # 3pm
 
@@ -26,7 +34,15 @@
   networking.hostName = "nixbtw";
   networking.networkmanager.enable = true;
 
+  # local dns
+  services.avahi = {
+    enable = true;
+    nssmdns4 = true;
+    openFirewall = true;
+  };
+
   time.timeZone = "America/New_York";
+  # time.timeZone = "America/Chicago";
 
   # Select internationalisation properties.
   i18n.defaultLocale = "en_US.UTF-8";
@@ -35,7 +51,42 @@
   services.xserver.xkb.options = "caps:escape";
 
   # Enable CUPS to print documents.
-  # services.printing.enable = true;
+  services.printing = {
+    enable = true;
+    drivers = [
+      pkgs.brlaser
+      pkgs.brgenml1lpr
+      pkgs.brgenml1cupswrapper
+    ];
+  };
+
+  # services.joycond.enable = true;
+  # services = {
+  #   udev = {
+  #     packages = with pkgs; [
+  #       game-devices-udev-rules
+  #     ];
+  #   };
+  # };
+
+  hardware.uinput.enable = true;
+
+  # for scanning from printers
+  hardware.sane = {
+    enable = true;
+
+    brscan4 = {
+      enable = true;
+      netDevices = {
+        home = {
+          model = "Brother HL-L2395DW series";
+          nodename = "BRNB4220024F78E.local";
+        };
+      };
+    };
+
+    extraBackends = [pkgs.sane-airscan];
+  };
 
   # sound with pipewire
   security.rtkit.enable = true;
@@ -47,18 +98,17 @@
     jack.enable = true;
   };
 
-  # Enable touchpad support (enabled default in most desktopManager).
-  # services.libinput.enable = true;
-
   programs.zsh.enable = true;
+
+  # automount disks
+  services.udisks2.enable = true;
 
   # Define a user account. Don't forget to set a password with ‘passwd’.
   users.users.tomas = {
     isNormalUser = true;
-    extraGroups = ["wheel" "networkmanager" "dialout"]; # Enable ‘sudo’ for the user.
+    extraGroups = ["wheel" "networkmanager" "dialout" "adbusers" "kvm" "scanner" "lp"];
     shell = pkgs.zsh;
     packages = with pkgs; [
-      tree # what does this do?
       home-manager
       neovim
     ];
@@ -73,33 +123,27 @@
     NIXOS_OZONE_WL = "1";
   };
 
-  # programs.firefox.enable = true;
-
   # List packages installed in system profile. To search, run:
   # $ nix search wget
   environment.systemPackages = with pkgs; [
-    # Do not forget to add an editor to edit configuration.nix! The Nano editor is also installed by default.
+    # fallback editor
     vim
 
     # utils
     brightnessctl
     wget
     playerctl
-    xorg.xlsclients
+    xlsclients
 
     # base apps
     firefox
     alacritty
     pavucontrol
 
-    eww
-    swww
-    tofi
-
     # hyprland misc
     hyprcursor
-    dunst
-    libnotify
+    # dunst
+    # libnotify
 
     # wayland
     xdg-desktop-portal
@@ -119,21 +163,43 @@
 
     upower
 
-    # theming things
-    # libsForQt5.qtstyleplugin-kvantum
-    # libsForQt5.qt5ct # Magic for some Qt apps keep functionality. KeepassXC
-    #                  # needs it to be able to minimize to tray. See
-    #                  # https://wiki.archlinux.org/title/Wayland#Qt
+    # communicating with ios device
+    libimobiledevice
+    ifuse
   ];
 
+  # faster boot without waiting for network manager
   systemd.services.NetworkManager-wait-online.enable = false;
+
+  programs.obs-studio = {
+    enable = true;
+    enableVirtualCamera = true;
+  };
+
+  # services.udev.packages = [
+  #   (pkgs.writeTextFile {
+  #     name = "70-my-foo.rules";
+  #     destination = "/etc/udev/rules.d/70-my-foo.rules";
+  #     text = ''
+  #       SUBSYSTEM=="usb", ATTRS{idVendor}=="8087", ATTRS{idProduct}=="0026", TAG+="uaccess"
+  #     '';
+  #     checkPhase = ''
+  #       ${config.systemd.package}/bin/udevadm verify --resolve-names=late $out/etc/udev/rules.d/70-my-foo.rules
+  #     '';
+  #   })
+  # ];
+
+  # environment.systemPackages = with pkgs; [
+  # ];
 
   # services
   # programs.dconf.enable = true;
+
+  # also for communicating with ios device
+  services.usbmuxd.enable = true;
+
   services.upower.enable = true;
-
   services.thermald.enable = true;
-
   services.auto-cpufreq.enable = true;
 
   services.auto-cpufreq.settings = {
@@ -162,6 +228,7 @@
           	esc (tap-hold 200 200 esc caps)
           	)
         '';
+        # q (multi c (macro 80 q))
       };
     };
   };

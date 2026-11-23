@@ -33,6 +33,9 @@
     wrapperFeatures.gtk = true;
   };
 
+	programs.niri.enable = true;
+	systemd.user.services.niri.enableDefaultPath = false;
+
   # programs.uwsm.enable = true;
   # programs.uwsm.waylandCompositors = {
   #   hyprland = {

@@ -10,7 +10,7 @@
 
     git-credential-manager
 
-		linuxPackages.usbip
+    linuxPackages.usbip
   ];
 
   # TODO: move
@@ -30,6 +30,18 @@
       padding-top = "35%";
       result-spacing = 25;
       width = "100%";
+    };
+  };
+
+  services.udiskie = {
+    enable = true;
+    settings = {
+      # workaround for
+      # https://github.com/nix-community/home-manager/issues/632
+      program_options = {
+        # replace with your favorite file manager
+        file_manager = "${pkgs.nemo-with-extensions}/bin/nemo";
+      };
     };
   };
 }

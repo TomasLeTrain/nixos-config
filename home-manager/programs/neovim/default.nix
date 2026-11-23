@@ -58,6 +58,8 @@ in {
         lspsAndRuntimeDeps = {
           general = with pkgs; [
             lazygit
+            wakatime-cli
+            tree-sitter # required by tree-sitter
           ];
           lua = with pkgs; [
             lua-language-server
@@ -68,7 +70,13 @@ in {
             alejandra
           ];
           cpp = with pkgs; [
-            clang_21
+            clang-tools
+          ];
+          rust = with pkgs; [
+            rustc
+            rust-analyzer
+            clippy
+            cargo
           ];
           typst = with pkgs; [
             tinymist
@@ -99,9 +107,11 @@ in {
             onedark-nvim
             (mkPlugin "vague.nvim" (builtins.fetchGit {
               url = "https://github.com/vague2k/vague.nvim";
-              rev = "f3620ef32fe8b756398d8dbed60166b2af6ea796";
+              rev = "42cc3077dd12e4287cdf2d07ed743046740950e8";
             }))
             oil-nvim
+
+            vim-wakatime
           ];
         };
 
@@ -116,6 +126,9 @@ in {
 
             # completion
             blink-cmp
+            rustaceanvim
+
+            lualine-nvim
 
             nvim-treesitter.withAllGrammars
             nvim-treesitter-textobjects
@@ -188,6 +201,7 @@ in {
             lua = true;
             nix = true;
             cpp = true;
+            rust = true;
             typst = true;
             qml = true;
           };

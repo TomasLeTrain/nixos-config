@@ -19,6 +19,8 @@
   # GTK Setup
   gtk = {
     enable = true;
+		colorScheme = "dark";
+		# default for gtk 2/3
     theme = {
       name = "catppuccin-mocha-lavender-standard";
       package = pkgs.catppuccin-gtk.override {
@@ -27,28 +29,37 @@
         variant = "mocha";
       };
     };
+		# default for all versions
     iconTheme = {
-      name = "Papirus-Dark";
-      package = pkgs.catppuccin-papirus-folders.override {
-        flavor = "mocha";
-        accent = "lavender";
-      };
+			name = "Papirus lol";
+			package = pkgs.papirus-icon-theme;
+      # name = "Papirus-Dark";
+      # package = pkgs.catppuccin-papirus-folders.override {
+      #   flavor = "mocha";
+      #   accent = "lavender";
+      # };
     };
+		# default for all versions
     cursorTheme = {
       name = "catppuccin-mocha-lavender-cursors";
       package = pkgs.catppuccin-cursors.mochaLavender;
     };
+
     gtk3 = {
       bookmarks = [
         "file:///home/tomas/school"
         "file:///home/tomas/projects"
+        "file:///home/tomas/projects/Robotics"
         "file:///home/tomas/Downloads"
+        "file:///home/tomas/Downloads/school"
         "file:///home/tomas/Documents"
         "file:///home/tomas/tmp"
       ];
       extraConfig.gtk-application-prefer-dark-theme = true;
     };
+		gtk4.theme = null;
   };
+
   dconf.settings = {
     "org/gtk/settings/file-chooser" = {
       sort-directories-first = true;
@@ -75,24 +86,6 @@
     }}/share/Kvantum/catppuccin-mocha-lavender";
   };
 
-    # qt5ct = {
-    #   target = "qt5ct/qt5ct.conf";
-    #   text = lib.generators.toINI { } {
-    #     Appearance = {
-    #       icon_theme = "Papirus-Dark";
-    #     };
-    #   };
-    # };
-
-    # qt6ct = {
-    #   target = "qt6ct/qt6ct.conf";
-    #   text = lib.generators.toINI { } {
-    #     Appearance = {
-    #       icon_theme = "Papirus-Dark";
-    #     };
-    #   };
-    # };
-
   # enable qt
   qt = {
     enable = true;
@@ -103,6 +96,6 @@
   home.sessionVariables = {
     QT_QPA_PLATFORM = "wayland";
     QT_QPA_PLATFORMTHEME = "qt5ct";
-    QT_STYLE_OVERRIDE = "kvantum";
+    # QT_STYLE_OVERRIDE = "kvantum";
   };
 }

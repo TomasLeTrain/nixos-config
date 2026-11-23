@@ -12,7 +12,7 @@
           "${pkgs.tuigreet}/bin/tuigreet"
           "--time"
           "--asterisks"
-          ''--greeting "like 67"''
+          ''--greeting "copmuter"''
           "--greet-align center"
           # "--user-menu"
           "--xsessions ${config.services.displayManager.sessionData.desktops}/share/xsessions"
@@ -32,7 +32,7 @@
             "container=black"
             "input=red"
           ])
-          ''--cmd "uwsm start -- hyprland-uwsm.desktop"''
+          # ''--cmd "uwsm start -- hyprland-uwsm.desktop"''
         ];
         user = "greeter";
       };
@@ -78,8 +78,12 @@
       kernelModules = ["i915"];
     };
 
-    kernelModules = ["kvm-intel"];
-    extraModulePackages = [];
+    kernelModules = ["kvm-intel" "snd-seq" "snd-rawmidi" "v4l2loopback"];
+    extraModulePackages = with config.boot.kernelPackages; [v4l2loopback];
+
+    extraModprobeConfig = ''
+      options v4l2loopback exclusive_caps=1 card_label="Virtual Camera"
+    '';
 
     kernelParams = [
       "i915.enable_guc=3"

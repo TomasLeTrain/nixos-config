@@ -1,0 +1,510 @@
+// -----------------------------------------------------------------------------
+// Input
+// -----------------------------------------------------------------------------
+
+input {
+    keyboard {
+        xkb {
+            layout "us"
+        }
+    }
+
+    touchpad {
+        tap
+        drag true
+        natural-scroll
+        accel-speed 0.7
+        accel-profile "flat"
+    }
+
+    mouse {
+        accel-speed 0.7
+        accel-profile "flat"
+    }
+
+    // Hyprland's follow_mouse = 1
+    focus-follows-mouse
+
+    // Make niri's Mod equivalent to Hyprland's SUPER.
+    mod-key "Super"
+}
+
+// -----------------------------------------------------------------------------
+// Outputs
+// -----------------------------------------------------------------------------
+
+// Hyprland's "auto" position is represented by simply omitting position.
+// Niri will automatically arrange connected outputs.
+//
+// The HDMI-A-1 and DP-3 modes used "highres@highrr" in Hyprland.
+// Those are Hyprland-specific mode-selection keywords, so they are
+// intentionally omitted here. See the notes below.
+
+output "eDP-1" {
+    mode "2560x1600@59.99"
+    scale 2.0
+}
+
+output "HDMI-A-1" {
+    scale 1.0
+}
+
+output "DP-3" {
+    scale 1.0
+}
+
+output "Sceptre Tech Inc Sceptre M27 NM275BIQ0001" {
+    mode "1920x1080@165.00"
+    scale 1.0
+}
+
+// -----------------------------------------------------------------------------
+// General layout
+// -----------------------------------------------------------------------------
+
+layout {
+    // Hyprland had gaps_in=5 and gaps_out=15.
+    //
+    // niri has one "gaps" value affecting both inner and outer gaps.
+    // Adding 10px struts gives approximately the same 5px inner / 15px
+    // outer spacing.
+    gaps 5
+
+    struts {
+        top 10
+        bottom 10
+        left 10
+        right 10
+    }
+
+    // Hyprland scrolling.column_width = 0.8
+    // default-column-width {
+    //     proportion 0.8
+    // }
+
+    // Hyprland had a 4px window border and no focus ring.
+    focus-ring {
+        off
+    }
+
+    border {
+        width 4
+
+        active-gradient from="#0033ff99" to="#aa00ff99" angle=45
+        inactive-color "#595959aa"
+    }
+
+    // Hyprland shadow was explicitly disabled.
+    shadow {
+        off
+    }
+}
+
+// -----------------------------------------------------------------------------
+// Window appearance
+// -----------------------------------------------------------------------------
+
+// Hyprland decoration:
+//     rounding = 11
+//     active_opacity = 1.0
+//     inactive_opacity = 1.0
+//
+// Niri needs clip-to-geometry to actually clip the window contents to the
+// rounded geometry. This is the closest equivalent to Hyprland's rounding.
+
+window-rule {
+    geometry-corner-radius 11
+    clip-to-geometry true
+
+    opacity 1.0
+
+	draw-border-with-background false
+
+    background-effect {
+        blur true
+        xray true
+    }
+}
+
+// -----------------------------------------------------------------------------
+// Blur
+// -----------------------------------------------------------------------------
+blur {
+    // passes 2
+    passes 1
+    // offset 20
+    offset 15
+    // noise 0.0117
+    // saturation 1.1696
+    noise 0.0117
+    saturation 1.1696
+}
+
+// -----------------------------------------------------------------------------
+// Animations
+// -----------------------------------------------------------------------------
+
+animations {
+    // Hyprland's windowIn:
+    //   0.06, 0.71, 0.25, 1
+    //
+    // Niri cannot express Hyprland's "slide right" animation directly,
+    // but it can use the same timing curve.
+    window-open {
+        duration-ms 180
+        curve "cubic-bezier" 0.06 0.71 0.25 1
+    }
+
+    // Hyprland's windowOut uses the same curve and duration.
+    // The direction ("slide down") cannot be reproduced directly.
+    window-close {
+        duration-ms 180
+        curve "cubic-bezier" 0.06 0.71 0.25 1
+    }
+
+    // Hyprland windowResize:
+    //   0.04, 0.67, 0.38, 1
+    window-resize {
+        duration-ms 180
+        curve "cubic-bezier" 0.04 0.67 0.38 1
+    }
+
+    // Hyprland workspaces animation used:
+    //   0.05, 0.9, 0.1, 1.08
+    //
+    // Niri's workspace switching is inherently tied to its vertical
+    // workspace model, so this gives a similar temporal curve.
+    workspace-switch {
+        duration-ms 200
+        curve "cubic-bezier" 0.05 0.9 0.1 1.08
+    }
+
+    // Niri's horizontal view movement is important for its scrolling layout.
+    horizontal-view-movement {
+        duration-ms 180
+        curve "cubic-bezier" 0.04 0.67 0.38 1
+    }
+
+    window-movement {
+        duration-ms 180
+        curve "cubic-bezier" 0.04 0.67 0.38 1
+    }
+}
+
+// -----------------------------------------------------------------------------
+// Startup
+// -----------------------------------------------------------------------------
+
+spawn-at-startup "awww-daemon"
+spawn-at-startup "quickshell"
+
+// Niri integrates Xwayland through xwayland-satellite rather than through
+// Hyprland's built-in Xwayland integration. See notes below.
+
+// -----------------------------------------------------------------------------
+// Keybindings
+// -----------------------------------------------------------------------------
+
+binds {
+    // Applications
+    Super+Return {
+        spawn "alacritty"
+    }
+
+    Super+Semicolon {
+        close-window
+    }
+
+    Super+M {
+        quit
+    }
+
+    Super+O {
+        spawn "obsidian"
+    }
+
+    Super+Shift+C {
+        spawn "speedcrunch"
+    }
+
+    Super+Shift+S {
+        // Equivalent intent to:
+        // hyprshot -m region --clipboard-only
+        //
+        // Niri's built-in screenshot UI handles region selection and
+        // write-to-disk=false makes it clipboard-only.
+        // screenshot-window write-to-disk=false
+        screenshot
+    }
+
+    Super+Shift+Return {
+        spawn "firefox"
+    }
+
+    Super+Ctrl+Return {
+        spawn "firefox" "-p" "school"
+    }
+
+    Super+E {
+        spawn "dolphin"
+    }
+
+    Super+V {
+        toggle-window-floating
+    }
+
+    Super+D {
+        spawn "tofi-drun" "--fuzzy-match" "true"
+    }
+
+    XF86Calculator {
+        spawn "speedcrunch"
+    }
+
+    Help {
+        spawn-sh "awww img ~/wallpapers/$(ls ~/wallpapers | shuf -n 1)"
+    }
+
+    // -------------------------------------------------------------------------
+    // Workspace selection
+    // -------------------------------------------------------------------------
+
+    Super+1 {
+        focus-workspace 1
+    }
+
+    Super+2 {
+        focus-workspace 2
+    }
+
+    Super+3 {
+        focus-workspace 3
+    }
+
+    Super+4 {
+        focus-workspace 4
+    }
+
+    Super+5 {
+        focus-workspace 5
+    }
+
+    Super+6 {
+        focus-workspace 6
+    }
+
+    Super+7 {
+        focus-workspace 7
+    }
+
+    Super+8 {
+        focus-workspace 8
+    }
+
+    Super+9 {
+        focus-workspace 9
+    }
+
+    Super+0 {
+        focus-workspace 10
+    }
+
+    // Hyprland movetoworkspace -> niri move-window-to-workspace.
+    Super+Shift+1 {
+        move-window-to-workspace 1
+    }
+
+    Super+Shift+2 {
+        move-window-to-workspace 2
+    }
+
+    Super+Shift+3 {
+        move-window-to-workspace 3
+    }
+
+    Super+Shift+4 {
+        move-window-to-workspace 4
+    }
+
+    Super+Shift+5 {
+        move-window-to-workspace 5
+    }
+
+    Super+Shift+6 {
+        move-window-to-workspace 6
+    }
+
+    Super+Shift+7 {
+        move-window-to-workspace 7
+    }
+
+    Super+Shift+8 {
+        move-window-to-workspace 8
+    }
+
+    Super+Shift+9 {
+        move-window-to-workspace 9
+    }
+
+    Super+Shift+0 {
+        move-window-to-workspace 10
+    }
+
+    // -------------------------------------------------------------------------
+    // Directional focus
+    //
+    // Hyprland:
+    //   h -> l
+    //   j -> d
+    //   k -> u
+    //   l -> r
+    //
+    // Niri distinguishes horizontal columns from windows stacked vertically.
+    // -------------------------------------------------------------------------
+
+    Super+H { focus-column-left; }
+    // Super+J { focus-window-down; }
+    // Super+K { focus-window-up; }
+    Super+L { focus-column-right; }
+
+    // -------------------------------------------------------------------------
+    // Directional movement
+    // -------------------------------------------------------------------------
+
+	// move columns left and right
+    Super+Shift+H { move-column-left; }
+    Super+Shift+L { move-column-right; }
+    Super+Shift+J { move-window-down; }
+    Super+Shift+K { move-window-up; }
+
+    // Alternative commands that move across workspaces when reaching
+    // the first or last window in a column.
+    Mod+J     { focus-window-or-workspace-down; }
+    Mod+K     { focus-window-or-workspace-up; }
+    Mod+Ctrl+J     { move-window-down-or-to-workspace-down; }
+    Mod+Ctrl+K     { move-window-up-or-to-workspace-up; }
+
+	// focus monitors
+    Super+Ctrl+H { focus-monitor-left; }
+    // Super+Ctrl+J { focus-monitor-down; }
+    // Super+Ctrl+K { focus-monitor-up; }
+    Super+Ctrl+L { focus-monitor-right; }
+
+
+    // -------------------------------------------------------------------------
+    // Workspace scrolling
+    // -------------------------------------------------------------------------
+
+    // Super+WheelScrollDown cooldown-ms=150 {
+    //     focus-workspace-down
+    // }
+    //
+    // Super+WheelScrollUp cooldown-ms=150 {
+    //     focus-workspace-up
+    // }
+
+    Super+F {
+		maximize-column
+	}
+    Super+Shift+F {
+		fullscreen-window
+	}
+
+    // VPN
+    Super+Shift+N {
+		// TODO: change to be in niri
+        spawn "~/.config/hypr/scripts/vpn.sh"
+    }
+
+    // Volume
+    XF86AudioRaiseVolume allow-when-locked=true {
+        spawn "wpctl" "set-volume" "@DEFAULT_AUDIO_SINK@" "5%+"
+    }
+
+    XF86AudioLowerVolume allow-when-locked=true {
+        spawn "wpctl" "set-volume" "@DEFAULT_AUDIO_SINK@" "5%-"
+    }
+
+    Shift+XF86AudioRaiseVolume allow-when-locked=true {
+        spawn "wpctl" "set-volume" "@DEFAULT_AUDIO_SINK@" "1%+"
+    }
+
+    Shift+XF86AudioLowerVolume allow-when-locked=true {
+        spawn "wpctl" "set-volume" "@DEFAULT_AUDIO_SINK@" "1%-"
+    }
+
+    // Brightness
+    XF86MonBrightnessUp allow-when-locked=true {
+        spawn "brightnessctl" "s" "10%+"
+    }
+
+    XF86MonBrightnessDown allow-when-locked=true {
+        spawn "brightnessctl" "s" "10%-"
+    }
+
+    // Mute / media
+    XF86AudioMute allow-when-locked=true {
+        spawn "wpctl" "set-mute" "@DEFAULT_AUDIO_SINK@" "toggle"
+    }
+
+    XF86AudioMicMute allow-when-locked=true {
+        spawn "wpctl" "set-mute" "@DEFAULT_AUDIO_SOURCE@" "toggle"
+    }
+
+    XF86AudioNext allow-when-locked=true {
+        spawn "playerctl" "next"
+    }
+
+    XF86AudioPause allow-when-locked=true {
+        spawn "playerctl" "play-pause"
+    }
+
+    XF86AudioPlay allow-when-locked=true {
+        spawn "playerctl" "play-pause"
+    }
+
+    XF86AudioPrev allow-when-locked=true {
+        spawn "playerctl" "previous"
+    }
+
+    // -------------------------------------------------------------------------
+    // Layout
+    // -------------------------------------------------------------------------
+
+    // There is no direct equivalent of:
+    //     layoutmsg togglesplit
+    //
+    // Niri does not have Hyprland-style split orientations in its scrolling
+    // layout, so this is intentionally omitted.
+
+    // -------------------------------------------------------------------------
+    // Mouse bindings
+    // -------------------------------------------------------------------------
+
+    // No Mod+mouse bindings are necessary.
+    //
+    // Niri natively provides:
+    //   Mod + left mouse  -> interactive move
+    //   Mod + right mouse -> interactive resize
+    //
+    // Therefore these Hyprland bindm entries are already built in.
+}
+
+// -----------------------------------------------------------------------------
+// Cursor
+// -----------------------------------------------------------------------------
+
+cursor {
+    xcursor-theme "catppuccin-mocha-lavender-cursors"
+    xcursor-size 32
+}
+
+// -----------------------------------------------------------------------------
+// Xwayland
+// -----------------------------------------------------------------------------
+
+// Niri uses xwayland-satellite. Once xwayland-satellite >= 0.7 is installed,
+// niri automatically creates DISPLAY and starts it on demand.
+xwayland-satellite {
+    path "xwayland-satellite"
+}

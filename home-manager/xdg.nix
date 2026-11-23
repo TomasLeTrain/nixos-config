@@ -7,6 +7,15 @@
   xdg = {
     enable = true;
 
+    terminal-exec = {
+      enable = true;
+      settings = {
+        default = [
+          "Alacritty.desktop"
+        ];
+      };
+    };
+
     mime.enable = true;
 
     mimeApps = {
@@ -17,7 +26,10 @@
 				"x-scheme-handler/http" = ["firefox.desktop"];
 				"x-scheme-handler/https" = ["firefox.desktop"];
 				"application/pdf" = ["org.pwmt.zathura.desktop" "firefox.desktop"];
-				# "image/png" = "sxiv.desktop";
+				"image/png" = "firefox.desktop";
+				"image/jpg" = "firefox.desktop";
+				"image/jpeg" = "firefox.desktop";
+				"inode/directory" = "org.gnome.Nautilus.desktop";
 			} //
 				lib.genAttrs (lib.strings.splitString ";" "image/bmp;image/gif;image/jpeg;image/jpg;image/png;image/tiff;image/x-bmp;image/x-portable-anymap;image/x-portable-bitmap;image/x-portable-graymap;image/x-tga;image/x-xpixmap")
 				(scheme: ["sxiv.desktop"]);

@@ -6,10 +6,16 @@ vim.g.maplocalleader = ' '
 vim.opt.winborder = "rounded"
 
 -- set colorscheme
--- vim.cmd.colorscheme('onedark')
 require("vague").setup(
-	{ transparent = true }
+	{
+		transparent = true,
+		-- default color looks too flashy while waiting for lualine to load
+		on_highlights = function(hl, c)
+			hl.StatusLine.bg = c.inactiveBg
+		end,
+	}
 )
+
 vim.cmd.colorscheme('vague')
 
 require("oil").setup()
@@ -25,14 +31,10 @@ map('n', 'co', ':copen<CR>')
 map('n', '<C-f>', ':Open .<CR>')
 map('n', '<leader>s', ':e #<CR>')
 map('n', '<leader>S', ':sf #<CR>')
-map({ 'n', 'v' }, '<leader>y', '"+y')
-map({ 'n', 'v' }, '<leader>d', '"+d')
 map({ 'n', 'v' }, '<leader>c', '1z=') -- autocorrect
-
 
 map({ "n", "v" }, "<leader>y", '"+y', { noremap = true, silent = true, desc = 'Yank to clipboard' })
 map({ "n", "v" }, "<leader>Y", '"+yy', { noremap = true, silent = true, desc = 'Yank line to clipboard' })
-
 map({ "n", "v" }, "<leader>d", '"+d')
 
 map("x", "<leader>p", '"_dP',
@@ -78,19 +80,58 @@ require('lze').load {
 			})
 		end,
 	},
+
+
 	{
 		"nvim-treesitter",
 		enabled = nixCats('general') or false,
+		-- cmd = { "" },
 		event = "DeferredUIEnter",
-		load = function(name)
-			vim.cmd.packadd(name)
-			vim.cmd.packadd("nvim-treesitter-textobjects")
-		end,
+		-- ft = "",
+		-- keys = "",
+		-- colorscheme = "",
 		after = function(plugin)
-			require('nvim-treesitter.configs').setup {
-				highlight = { enable = true, },
-				indent = { enable = true, },
-			}
+			---@param buf integer
+			---@param language string
+			local function treesitter_try_attach(buf, language)
+				-- check if parser exists and load it
+				if not vim.treesitter.language.add(language) then
+					return false
+				end
+				-- enables syntax highlighting and other treesitter features
+				vim.treesitter.start(buf, language)
+
+				-- enables treesitter based folds
+				vim.wo.foldexpr = "v:lua.vim.treesitter.foldexpr()"
+				vim.wo.foldmethod = "expr"
+				-- ensure folds are open to begin with
+				vim.o.foldlevel = 99
+
+				-- enables treesitter based indentation
+				vim.bo.indentexpr = "v:lua.require'nvim-treesitter'.indentexpr()"
+
+				return true
+			end
+
+			local installable_parsers = require("nvim-treesitter").get_available()
+			vim.api.nvim_create_autocmd("FileType", {
+				callback = function(args)
+					local buf, filetype = args.buf, args.match
+					local language = vim.treesitter.language.get_lang(filetype)
+					if not language then
+						return
+					end
+
+					if not treesitter_try_attach(buf, language) then
+						if vim.tbl_contains(installable_parsers, language) then
+							-- not already installed, so try to install them via nvim-treesitter if possible
+							require("nvim-treesitter").install(language):await(function()
+								treesitter_try_attach(buf, language)
+							end)
+						end
+					end
+				end,
+			})
 		end,
 	},
 	{
@@ -101,7 +142,6 @@ require('lze').load {
 			require('mini.pairs').setup()
 			require('mini.icons').setup()
 			require('mini.ai').setup()
-			require('mini.snippets').setup()
 
 			require('mini.pick').setup(
 				{
@@ -116,11 +156,19 @@ require('lze').load {
 		end,
 	},
 	{
+		"lualine.nvim",
+		enabled = nixCats('general') or false,
+		event = "DeferredUIEnter",
+		after = function(plugin)
+			require('lualine').setup()
+		end,
+	},
+	{
 		"neogen",
 		enabled = nixCats('general') or false,
 		event = "DeferredUIEnter",
 		after = function(plugin)
-			require('neogen').setup({ snippet_engine = "mini" })
+			require('neogen').setup({ snippet_engine = "nvim" })
 			map("n", "<Leader>nf", ":lua require('neogen').generate()<CR>", opts)
 		end,
 	},
@@ -146,6 +194,13 @@ require('lze').load {
 					tooltip = 'Overcomplicated Text Manipulator.',
 					icon = nil,
 				},
+				display = {
+					theme = 'catppuccin',
+					flavor = 'dark',
+					view = 'full',
+					swap_fields = false,
+					swap_icons = false,
+				},
 				timestamp = {
 					enabled = true,
 					reset_on_idle = false,
@@ -156,18 +211,32 @@ require('lze').load {
 				},
 				text = {
 					default = '',
-					viewing = 'Looking at words',
-					editing = 'Editing codes',
+					viewing = 'Looking at codes',
+					editing = 'Editing ${filename}',
 					file_browser = 'Browsing files',
 					dashboard = 'Vibing',
 				},
-				buttons = nil,
-				-- buttons = {
-				--   {
-				--     label = 'View Repository',
-				--     url = function(opts) return opts.repo_url end,
-				--   },
-				-- },
+				variables = true, -- Enable string templates
+				advanced = {
+					workspace = {
+						root_markers = {
+							'.git',
+							'.hg',
+							'.svn',
+						},
+						limit_to_cwd = false,
+					},
+					server = {
+						update = 'none',
+						auto_update = false,
+					},
+				},
+				buttons = {
+					{
+						label = 'View Repository',
+						url = function(opts) return opts.repo_url end,
+					},
+				},
 			}
 		end,
 	}
@@ -240,7 +309,26 @@ require('lze').load {
 		end,
 	},
 	{ "lua_ls",   enabled = nixCats('lua') or false,   lsp = {} },
-	{ "clangd",   enabled = nixCats("cpp") or false,   lsp = {} },
+	{ "clangd", enabled = nixCats("cpp") or false, lsp = {
+		cmd = { 'clangd', '--background-index', "--clang-tidy" }
+	} },
+	{ "rust_analyzer", enabled = nixCats("rust") or false, lsp = {
+		settings = {
+			["rust-analyzer"] = {
+				check = {
+					command = "clippy",
+				},
+				cargo = {
+					buildScripts = {
+						enable = true,
+					},
+				},
+				procMacro = {
+					enable = true,
+				}
+			}
+		}
+	} },
 	{ "tinymist", enabled = nixCats("typst") or false, lsp = {} },
 	{ "qmlls",    enabled = nixCats("qml") or false,   lsp = {} },
 	{ "nixd",
