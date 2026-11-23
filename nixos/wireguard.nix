@@ -38,7 +38,8 @@
           allowedIPs = ["0.0.0.0/0" "::/0"];
 
           # Set this to the server IP and port.
-          endpoint = builtins.readFile (config.security.nix-secrets.secrets."wg/home_ip".path) + ":51820";
+          # TODO: wait for nix-secrets to support vars, for now must still exclude from git
+          # endpoint = builtins.readFile (config.security.nix-secrets.secrets."wg/home_ip".path) + ":51820";
 
           # ToDo: route to endpoint not automatically configured
           # https://wiki.archlinux.org/index.php/WireGuard#Loop_routing

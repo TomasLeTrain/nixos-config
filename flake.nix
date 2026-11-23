@@ -2,7 +2,6 @@
   description = "NIXOS configuration";
 
   inputs = {
-    self.submodules = true;
     nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
     home-manager = {
       url = "github:nix-community/home-manager";
@@ -28,6 +27,7 @@
     home-manager,
     nix-colors,
     nix-secrets,
+    flake-secrets,
     ...
   } @ inputs: let
     system = "x86_64-linux";
@@ -41,7 +41,7 @@
       nixbtw = lib.nixosSystem {
         inherit system pkgs;
         specialArgs = {
-          inherit nix-secrets;
+          inherit nix-secrets flake-secrets;
           root = ./.;
         };
         modules = [

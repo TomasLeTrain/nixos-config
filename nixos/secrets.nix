@@ -1,8 +1,9 @@
-{root, ...}: {
+{flake-secrets, ...}: {
   security.nix-secrets = {
     enable = true;
-    storage = "${root}/secrets";
-    storagePath = "/home/tomas/flake/secrets";
+
+    storage = "${flake-secrets}";
+
     identityPaths = [
       "/home/tomas/.config/nix-secrets/keys.txt"
     ];
