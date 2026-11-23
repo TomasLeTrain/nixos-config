@@ -2,7 +2,7 @@
   description = "NIXOS configuration";
 
   inputs = {
-    # self.submodules = true;
+    self.submodules = true;
     nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
     home-manager = {
       url = "github:nix-community/home-manager";
